@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ujjwal Pandey | Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --c1: #0a0a0f;
+    --c2: #111118;
+    --accent1: #7f5af0;
+    --accent2: #2cb67d;
+    --accent3: #ff6b6b;
+    --accent4: #ffd166;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
+    --text: #fffffe;
+    --muted: rgba(255,255,255,0.5);
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--c1);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--accent1);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: exclusion;
+  }
+  .cursor-follower {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--accent1);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.18s ease;
+    mix-blend-mode: exclusion;
+  }
+
+  /* CANVAS */
+  #particle-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 5vw;
+    backdrop-filter: blur(20px);
+    background: rgba(10,10,15,0.6);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 2px;
+    background: var(--accent1);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* SECTIONS */
+  section {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 8rem 5vw 4rem;
+  }
+
+  /* HERO */
+  #hero {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding-top: 10rem;
+  }
+  .hero-eyebrow {
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    font-weight: 500;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3rem, 9vw, 7rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+  .hero-title .highlight {
+    background: linear-gradient(135deg, var(--accent1) 0%, var(--accent3) 50%, var(--accent4) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease infinite;
+  }
+  @keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.7s forwards;
+  }
+  .hero-cta {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s forwards;
+  }
+  .btn {
+    padding: 0.9rem 2rem;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: none;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent1), var(--accent3));
+    color: white;
+    border: none;
+    box-shadow: 0 0 30px rgba(127,90,240,0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 50px rgba(127,90,240,0.6);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+  }
+  .btn-ghost:hover {
+    background: var(--glass);
+    border-color: var(--accent1);
+    transform: translateY(-3px);
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeIn 1s 1.5s forwards;
+  }
+  .scroll-indicator span {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--accent1), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+  @keyframes scrollPulse {
+    0%,100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+
+  /* ABOUT */
+  #about {
+    flex-direction: row;
+    gap: 6vw;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .about-visual {
+    flex: 1;
+    min-width: 260px;
+    max-width: 380px;
+    position: relative;
+  }
+  .about-card {
+    width: 100%;
+    aspect-ratio: 3/4;
+    border-radius: 24px;
+    background: linear-gradient(135deg, var(--accent1) 0%, var(--accent2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 5rem;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 30px 80px rgba(127,90,240,0.3);
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .about-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    border-radius: inherit;
+  }
+  .about-card:hover { transform: rotateY(8deg) rotateX(-4deg) scale(1.02); }
+  .about-deco {
+    position: absolute;
+    width: 100px; height: 100px;
+    border: 2px solid var(--accent2);
+    border-radius: 16px;
+    bottom: -20px; right: -20px;
+    opacity: 0.5;
+    transform: rotate(15deg);
+  }
+  .about-deco2 {
+    position: absolute;
+    width: 60px; height: 60px;
+    border: 2px solid var(--accent4);
+    border-radius: 12px;
+    top: -15px; left: -15px;
+    opacity: 0.5;
+    transform: rotate(-10deg);
+  }
+  .about-content { flex: 2; min-width: 280px; }
+  .section-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent1);
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+  .about-text {
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
+    font-weight: 300;
+  }
+  .skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .skill-tag {
+    padding: 0.5rem 1.1rem;
+    border-radius: 50px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+  }
+  .skill-tag:hover {
+    background: rgba(127,90,240,0.2);
+    border-color: var(--accent1);
+    transform: translateY(-2px);
+  }
+
+  /* SERVICES */
+  #services { flex-direction: column; gap: 3rem; }
+  .section-header { text-align: center; }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+  }
+  .service-card {
+    padding: 2.5rem;
+    border-radius: 20px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    transition: all 0.4s ease;
+    transform-style: preserve-3d;
+    position: relative;
+    overflow: hidden;
+    cursor: none;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(127,90,240,0.15), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .service-card:hover::before { opacity: 1; }
+  .service-card:hover {
+    transform: translateY(-8px) rotateX(3deg);
+    border-color: rgba(127,90,240,0.4);
+    box-shadow: 0 20px 60px rgba(127,90,240,0.2);
+  }
+  .service-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+  .service-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+  .service-card p {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 0.95rem;
+    font-weight: 300;
+  }
+  .service-accent {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.3;
+  }
+
+  /* PROJECTS */
+  #projects { flex-direction: column; gap: 3rem; }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+  }
+  .project-card {
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    transition: all 0.4s ease;
+    transform-style: preserve-3d;
+    cursor: none;
+  }
+  .project-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    border-color: rgba(44,182,125,0.4);
+    box-shadow: 0 20px 60px rgba(44,182,125,0.15);
+  }
+  .project-thumb {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(10,10,15,0.8));
+  }
+  .project-info { padding: 1.5rem; }
+  .project-info h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .project-info p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+  .project-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .project-tag {
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  /* CONTACT */
+  #contact { flex-direction: column; gap: 3rem; align-items: center; text-align: center; }
+  .contact-card {
+    max-width: 600px;
+    width: 100%;
+    padding: 3.5rem;
+    border-radius: 28px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(30px);
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(127,90,240,0.08) 0%, transparent 60%);
+    animation: rotateBg 10s linear infinite;
+  }
+  @keyframes rotateBg {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .contact-card > * { position: relative; z-index: 1; }
+  .contact-email {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    color: var(--accent2);
+    margin: 1.5rem 0;
+    word-break: break-all;
+  }
+  .contact-note {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    font-weight: 300;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* GLOW BLOBS */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+    animation: blobFloat 8s ease-in-out infinite;
+  }
+  .blob1 { width: 500px; height: 500px; background: var(--accent1); top: -100px; left: -100px; }
+  .blob2 { width: 400px; height: 400px; background: var(--accent2); bottom: -100px; right: -100px; animation-delay: -4s; }
+  .blob3 { width: 300px; height: 300px; background: var(--accent3); top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -2s; }
+  @keyframes blobFloat {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(30px,-20px) scale(1.05); }
+    66% { transform: translate(-20px,30px) scale(0.95); }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    #about { flex-direction: column; }
+    .about-visual { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-follower" id="cursorFollower"></div>
+
+<!-- Glow Blobs -->
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<!-- Particle Canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">UP.</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <p class="hero-eyebrow">✦ Available for freelance work</p>
+  <h1 class="hero-title">Hi, I'm<br><span class="highlight">Ujjwal</span><br>Pandey</h1>
+  <p class="hero-sub">I build beautiful websites & grow brands on social media. Turning ideas into digital experiences that people love.</p>
+  <div class="hero-cta">
+    <a href="#projects" class="btn btn-primary">View My Work ↓</a>
+    <a href="#contact" class="btn btn-ghost">Let's Talk →</a>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-visual reveal">
+    <div class="about-card">UP</div>
+    <div class="about-deco"></div>
+    <div class="about-deco2"></div>
+  </div>
+  <div class="about-content reveal">
+    <p class="section-label">About Me</p>
+    <h2 class="section-title">Designer.<br>Developer.<br>Strategist.</h2>
+    <p class="about-text">
+      I'm Ujjwal Pandey — an 18-year-old passionate web designer and social media strategist. I craft pixel-perfect websites and data-driven social strategies that help brands stand out in the digital world.
+    </p>
+    <div class="skills-grid">
+      <span class="skill-tag">HTML & CSS</span>
+      <span class="skill-tag">JavaScript</span>
+      <span class="skill-tag">UI/UX Design</span>
+      <span class="skill-tag">Responsive Design</span>
+      <span class="skill-tag">Social Media Strategy</span>
+      <span class="skill-tag">Content Creation</span>
+      <span class="skill-tag">Brand Identity</span>
+      <span class="skill-tag">Instagram Growth</span>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-header reveal">
+    <p class="section-label">What I Do</p>
+    <h2 class="section-title">Services I Offer</h2>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <span class="service-icon">🌐</span>
+      <h3>Web Design & Development</h3>
+      <p>Beautiful, fast, and responsive websites tailored to your brand. From landing pages to full portfolios — I build it all with clean code and stunning visuals.</p>
+      <div class="service-accent" style="background: var(--accent1);"></div>
+    </div>
+    <div class="service-card reveal" style="transition-delay: 0.1s;">
+      <span class="service-icon">📱</span>
+      <h3>Social Media Management</h3>
+      <p>Strategic content creation, consistent posting, audience engagement, and growth hacking across Instagram, Facebook, and other platforms to build your brand.</p>
+      <div class="service-accent" style="background: var(--accent2);"></div>
+    </div>
+    <div class="service-card reveal" style="transition-delay: 0.2s;">
+      <span class="service-icon">🎨</span>
+      <h3>Brand Identity</h3>
+      <p>Cohesive visual branding — logos, color palettes, typography, and style guides that make your brand instantly recognizable and memorable.</p>
+      <div class="service-accent" style="background: var(--accent3);"></div>
+    </div>
+    <div class="service-card reveal" style="transition-delay: 0.3s;">
+      <span class="service-icon">📈</span>
+      <h3>Digital Strategy</h3>
+      <p>Comprehensive digital presence planning — from website structure to social media funnels, I help you grow your audience and convert visitors into customers.</p>
+      <div class="service-accent" style="background: var(--accent4);"></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-header reveal">
+    <p class="section-label">My Work</p>
+    <h2 class="section-title">Featured Projects</h2>
+  </div>
+  <div class="projects-grid">
+    <div class="project-card reveal">
+      <div class="project-thumb" style="background: linear-gradient(135deg, #7f5af0, #2cb67d);">🛍️</div>
+      <div class="project-info">
+        <h3>E-Commerce Landing Page</h3>
+        <p>A modern, conversion-optimized landing page for a fashion brand with smooth animations and mobile-first design.</p>
+        <div class="project-tags">
+          <span class="project-tag" style="background:rgba(127,90,240,0.2);color:#7f5af0;">HTML/CSS</span>
+          <span class="project-tag" style="background:rgba(44,182,125,0.2);color:#2cb67d;">JavaScript</span>
+        </div>
+      </div>
+    </div>
+    <div class="project-card reveal" style="transition-delay:0.1s;">
+      <div class="project-thumb" style="background: linear-gradient(135deg, #ff6b6b, #ffd166);">📊</div>
+      <div class="project-info">
+        <h3>Social Media Growth Campaign</h3>
+        <p>Grew a local business Instagram from 200 to 5,000 followers in 3 months using strategic content and engagement tactics.</p>
+        <div class="project-tags">
+          <span class="project-tag" style="background:rgba(255,107,107,0.2);color:#ff6b6b;">Instagram</span>
+          <span class="project-tag" style="background:rgba(255,209,102,0.2);color:#ffd166;">Strategy</span>
+        </div>
+      </div>
+    </div>
+    <div class="project-card reveal" style="transition-delay:0.2s;">
+      <div class="project-thumb" style="background: linear-gradient(135deg, #2cb67d, #7f5af0);">💼</div>
+      <div class="project-info">
+        <h3>Business Portfolio Website</h3>
+        <p>A professional multi-page website for a consultant with blog, services page, and integrated contact form.</p>
+        <div class="project-tags">
+          <span class="project-tag" style="background:rgba(44,182,125,0.2);color:#2cb67d;">Web Dev</span>
+       <span class="project-tag" style="background:rgba(127,90,240,0.2);color:#7f5af0;">UI Design</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header reveal">
+    <p class="section-label">Get In Touch</p>
+    <h2 class="section-title">Let's Work Together</h2>
+  </div>
+  <div class="contact-card reveal">
+    <p style="font-size:2.5rem; margin-bottom:1rem;">✦</p>
+    <h3 style="font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:700; margin-bottom:0.5rem;">Have a project in mind?</h3>
+    <p class="contact-note">I'm open to freelance work — websites, social media management, brand strategy. Let's build something amazing together!</p>
+    <p class="contact-email">ujjwalpandey140@gmail.com</p>
+    <a href="https://mail.google.com/mail/?view=cm&to=ujjwalpandey140@gmail.com&su=Project Inquiry&body=Hi Ujjwal, I would like to work with you!" target="_blank" class="btn btn-primary" style="margin: 0 auto; display:inline-flex;">Send Me an Email ✉️</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Ujjwal Pandey — Designed & Built with ❤️</p>
+</footer>
+
+<script>
+// CUSTOM CURSOR
+const cursor = document.getElementById('cursor');
+const follower = document.getElementById('cursorFollower');
+let mx = 0, my = 0, fx = 0, fy = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 6 + 'px';
+  cursor.style.top = my - 6 + 'px';
+});
+function animateFollower() {
+  fx += (mx - fx) * 0.12;
+  fy += (my - fy) * 0.12;
+  follower.style.left = fx - 18 + 'px';
+  follower.style.top = fy - 18 + 'px';
+  requestAnimationFrame(animateFollower);
+}
+animateFollower();
+document.querySelectorAll('a, button, .service-card, .project-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'scale(2)';
+    follower.style.transform = 'scale(1.5)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'scale(1)';
+    follower.style.transform = 'scale(1)';
+  });
+});
+
+// PARTICLES
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const COLORS = ['#7f5af0','#2cb67d','#ff6b6b','#ffd166','#ffffff'];
+function createParticle() {
+  return {
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: Math.random() * 1.5 + 0.3,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    alpha: Math.random() * 0.6 + 0.1,
+    twinkle: Math.random() * Math.PI * 2
+  };
+}
+for (let i = 0; i < 180; i++) particles.push(createParticle());
+
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => {
+    p.twinkle += 0.02;
+    const a = p.alpha * (0.6 + 0.4 * Math.sin(p.twinkle));
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = a;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > W) p.vx *= -1;
+    if (p.y < 0 || p.y > H) p.vy *= -1;
+  });
+  // Draw connections
+  ctx.globalAlpha = 0.04;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i+1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 100) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = '#7f5af0';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// 3D TILT on service cards
+document.querySelectorAll('.service-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const rotX = ((y - cy) / cy) * -8;
+    const rotY = ((x - cx) / cx) * 8;
+    card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-8px)`;
+    card.style.setProperty('--mx', (x / rect.width * 100) + '%');
+    card.style.setProperty('--my', (y / rect.height * 100) + '%');
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+  });
+});
+
+// SCROLL REVEAL
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(r => observer.observe(r));
+
+// PARALLAX on hero
+document.addEventListener('mousemove', e => {
+  const x = (e.clientX / window.innerWidth - 0.5) * 20;
+  const y = (e.clientY / window.innerHeight - 0.5) * 20;
+  document.querySelectorAll('.blob').forEach((b, i) => {
+    const factor = (i+1) * 0.3;
+    b.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
+  });
+});
+</script>
+</body>
+</html>
